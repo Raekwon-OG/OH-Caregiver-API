@@ -7,18 +7,10 @@ on:
 jobs:
   prechecks:
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:6.0
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'" --health-interval=5s --health-timeout=2s --health-retries=5
-        ports:
-          - 27017:27017
+    # Using an external managed MongoDB (Atlas) for CI: set MONGODB_URI in repository secrets
+    # as 'MONGODB_URI' (do NOT commit credentials). This avoids flaky local service network issues.
     env:
-      # Use the service hostname (mongodb) which is reachable from the runner when the job
-      # and service share the same network namespace. Some runners expose services via
-      # localhost but others require the service hostname — try the hostname first.
-      MONGODB_URI: mongodb://mongodb:27017/oh-caregiver
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
       PORT: 4000
 
     steps:
