@@ -12,7 +12,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oh-car
 
 async function start() {
   await connectDatabase(MONGODB_URI);
-  const app = createApp();
+  const app = await createApp();
   const server = http.createServer(app);
   initSocket(server);
 
