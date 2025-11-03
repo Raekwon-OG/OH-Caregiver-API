@@ -14,7 +14,7 @@ Prerequisites
 
 Clone & install
 ```bash
-git clone <repo-url>
+git clone https://github.com/Raekwon-OG/OH-Caregiver-API.git
 cd OH-Caregiver-API
 npm install
 ```
