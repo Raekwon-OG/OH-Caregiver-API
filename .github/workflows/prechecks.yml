@@ -15,7 +15,9 @@ jobs:
         ports:
           - 27017:27017
     env:
-      MONGODB_URI: mongodb://mongodb:27017/oh-caregiver
+      # Services are exposed to the runner via localhost when using GitHub Actions services + port mapping.
+      # Use localhost (127.0.0.1) here so the job steps can reach the MongoDB service container.
+      MONGODB_URI: mongodb://127.0.0.1:27017/oh-caregiver
       PORT: 4000
 
     steps:
@@ -38,6 +40,25 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Wait for MongoDB to be reachable
+        # Ensure the service port is open before starting the server to avoid getaddrinfo / connection errors
+        run: |
+          set -e
+          echo "Waiting for MongoDB on 127.0.0.1:27017..."
+          for i in {1..60}; do
+            if bash -c 'cat < /dev/tcp/127.0.0.1/27017' >/dev/null 2>&1; then
+              echo "MongoDB is reachable"; break
+            fi
+            echo "MongoDB not ready yet (attempt $i/60), sleeping 1s..."
+            sleep 1
+          done
+          if ! bash -c 'cat < /dev/tcp/127.0.0.1/27017' >/dev/null 2>&1; then
+            echo "ERROR: MongoDB did not become reachable on 127.0.0.1:27017"
+            echo '--- docker ps ---'
+            docker ps || true
+            exit 1
+          fi
 
       - name: Start server (background)
         env:
