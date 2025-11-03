@@ -16,7 +16,7 @@ const ProtectedMemberSchema: Schema = new Schema(
     lastName: { type: String },
     relationship: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true, optimisticConcurrency: true }
 );
 
 ProtectedMemberSchema.index({ caregiverId: 1 });
