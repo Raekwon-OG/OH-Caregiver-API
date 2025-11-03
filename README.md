@@ -40,6 +40,12 @@ npx ts-node scripts/supabase-client.ts signup you@example.com 'Password1!'
 npx ts-node scripts/supabase-client.ts login you@example.com 'Password1!' -t
 ```
 
+Running the real-socket concurrency test (local only)
+```bash
+# This test uses a real Socket.IO client and is skipped by default. To run it locally:
+RUN_REAL_SOCKET=true npm test -- tests/integration/protectedMember.realSocket.test.ts
+```
+
 ## Design explanation (succinct)
 
 1. Language & framework
