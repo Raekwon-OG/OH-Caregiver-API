@@ -10,7 +10,13 @@ export function initSocket(server: HttpServer) {
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token as string | undefined;
-    if (process.env.SKIP_AUTH === 'true') return next();
+    if (process.env.SKIP_AUTH === 'true') {
+      // In test/dev mode we short-circuit auth. Attach a deterministic caregiverId so
+      // test socket clients join the same caregiver room that server emits to.
+      // Use TEST_SOCKET_CAREGIVER_ID if provided to make tests explicit.
+      (socket as any).caregiverId = process.env.TEST_SOCKET_CAREGIVER_ID || '000000000000000000000000';
+      return next();
+    }
     if (!token) return next(new Error('Missing token'));
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET || '') as any;

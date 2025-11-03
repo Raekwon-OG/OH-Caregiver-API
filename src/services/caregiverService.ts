@@ -15,5 +15,25 @@ export async function findCaregiverByEmail(email: string) {
 
 export async function verifyPassword(caregiver: Partial<ICaregiver>, password: string) {
   if (!caregiver.passwordHash) return false;
-  return bcrypt.compare(password, caregiver.passwordHash);
+  return bcrypt.compare(password, caregiver.passwordHash as string);
+}
+
+export async function findOrCreateBySupabaseId(supabaseId: string, attrs: { email?: string; name?: string }) {
+  // Try to find by supabaseId first
+  let existing = await Caregiver.findOne({ supabaseId }).lean();
+  if (existing) return existing;
+
+  // Fallback: if an account with same email exists, link it (do not overwrite passwordHash)
+  if (attrs.email) {
+    existing = await Caregiver.findOne({ email: attrs.email }).lean();
+    if (existing) {
+      // link existing document
+      await Caregiver.updateOne({ _id: existing._id }, { $set: { supabaseId } });
+      return { ...existing, supabaseId };
+    }
+  }
+
+  // Create minimal caregiver record (no passwordHash)
+  const created = await Caregiver.create({ name: attrs.name || 'Supabase User', email: attrs.email || `${supabaseId}@supabase`, supabaseId });
+  return created.toObject();
 }
