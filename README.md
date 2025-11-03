@@ -1,6 +1,6 @@
 # OneHaven Caregiver API
 
-[![Prechecks](https://github.com/<owner>/<repo>/actions/workflows/prechecks.yml/badge.svg?branch=main)](https://github.com/<owner>/<repo>/actions/workflows/prechecks.yml)
+[![Prechecks](https://github.com/Raekwon-OG/OH-Caregiver-API/actions/workflows/prechecks.yml/badge.svg?branch=main)](https://github.com/Raekwon-OG/OH-Caregiver-API/actions/workflows/prechecks.yml)
 
 A compact backend for the OneHaven caregiver app. Built with TypeScript, Express, Mongoose, Supabase auth (JWT), Zod validation and Socket.IO realtime hooks.
 
@@ -86,7 +86,7 @@ npx ts-node scripts/supabase-client.ts login you@example.com 'Password1!' -t
 
 ## Continuous Integration
 
-A GitHub Actions workflow named `prechecks` runs on PRs to `main`. It performs TypeScript type-checking, ESLint linting, builds the project, and starts the built server to run a minimal /health smoke test (a MongoDB service is available to the job). Replace the badge owner/repo in the top of this file with your repository details to show live status.
+A GitHub Actions workflow named `prechecks` runs on PRs to `main`. It performs TypeScript type-checking, ESLint linting, builds the project, and starts the built server to run a minimal /health smoke test (a MongoDB service is available to the job). The badge above links to the workflow run page.
 
 ## Branch Protection
 
