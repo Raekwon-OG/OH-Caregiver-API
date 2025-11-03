@@ -13,6 +13,7 @@ jest.mock('../../src/utils/jwks', () => ({
 import { createApp } from '../../src/app';
 import { connectDatabase } from '../../src/config/database';
 import { initSocket } from '../../src/utils/socket';
+import * as socketUtils from '../../src/utils/socket';
 
 describe('ProtectedMember concurrent updates', () => {
   let mongod: MongoMemoryServer;
@@ -45,9 +46,8 @@ describe('ProtectedMember concurrent updates', () => {
   test('concurrent updates should succeed with optimistic concurrency and emit socket events', async () => {
     const server = request(baseUrl);
 
-    // spy on emitToCaregiver so we can assert emits without needing a real socket client
-    const socketUtils = require('../../src/utils/socket');
-    const emitSpy = jest.spyOn(socketUtils, 'emitToCaregiver');
+  // spy on emitToCaregiver so we can assert emits without needing a real socket client
+  const emitSpy = jest.spyOn(socketUtils, 'emitToCaregiver');
 
     const events: { added: any[]; updated: any[] } = { added: [], updated: [] };
     // record spy calls
