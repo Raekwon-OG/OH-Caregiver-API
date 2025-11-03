@@ -15,9 +15,10 @@ jobs:
         ports:
           - 27017:27017
     env:
-      # Services are exposed to the runner via localhost when using GitHub Actions services + port mapping.
-      # Use localhost (127.0.0.1) here so the job steps can reach the MongoDB service container.
-      MONGODB_URI: mongodb://127.0.0.1:27017/oh-caregiver
+      # Use the service hostname (mongodb) which is reachable from the runner when the job
+      # and service share the same network namespace. Some runners expose services via
+      # localhost but others require the service hostname — try the hostname first.
+      MONGODB_URI: mongodb://mongodb:27017/oh-caregiver
       PORT: 4000
 
     steps:
@@ -42,19 +43,25 @@ jobs:
         run: npm run build
 
       - name: Wait for MongoDB to be reachable
-        # Ensure the service port is open before starting the server to avoid getaddrinfo / connection errors
+        # Try the service hostname first (mongodb), then fallback to localhost. This covers
+        # both GitHub Actions service setups (service-hostname reachable in container network
+        # or port-mapped to localhost on the runner).
         run: |
           set -e
-          echo "Waiting for MongoDB on 127.0.0.1:27017..."
-          for i in {1..60}; do
-            if bash -c 'cat < /dev/tcp/127.0.0.1/27017' >/dev/null 2>&1; then
-              echo "MongoDB is reachable"; break
-            fi
-            echo "MongoDB not ready yet (attempt $i/60), sleeping 1s..."
-            sleep 1
+          hosts=(mongodb 127.0.0.1)
+          ok=0
+          for host in "${hosts[@]}"; do
+            echo "Checking MongoDB at ${host}:27017"
+            for i in {1..60}; do
+              if bash -c "cat < /dev/tcp/${host}/27017" >/dev/null 2>&1; then
+                echo "MongoDB is reachable at ${host}:27017"; ok=1; break 2
+              fi
+              echo "Not reachable at ${host}:27017 (attempt $i/60), sleeping 1s..."
+              sleep 1
+            done
           done
-          if ! bash -c 'cat < /dev/tcp/127.0.0.1/27017' >/dev/null 2>&1; then
-            echo "ERROR: MongoDB did not become reachable on 127.0.0.1:27017"
+          if [ $ok -ne 1 ]; then
+            echo "ERROR: MongoDB did not become reachable at any expected address"
             echo '--- docker ps ---'
             docker ps || true
             exit 1
