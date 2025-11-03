@@ -59,7 +59,7 @@ describe('ProtectedMember concurrent updates', () => {
 
     const createRes = await server
       .post('/api/protected-members')
-      .send({ firstName: 'John', lastName: 'Doe', relationship: 'son' })
+      .send({ firstName: 'John', lastName: 'Doe', relationship: 'son', birthYear: 2010, status: 'active' })
       .expect(201);
 
     const id = createRes.body._id || createRes.body.id;

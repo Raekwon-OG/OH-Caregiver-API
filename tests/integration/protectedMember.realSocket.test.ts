@@ -75,7 +75,7 @@ const RUN_REAL = process.env.RUN_REAL_SOCKET === 'true';
 
     const createRes = await server
       .post('/api/protected-members')
-      .send({ firstName: 'Socket', lastName: 'Test', relationship: 'friend' })
+      .send({ firstName: 'Socket', lastName: 'Test', relationship: 'friend', birthYear: 2005, status: 'active' })
       .expect(201);
 
     const id = createRes.body._id || createRes.body.id;

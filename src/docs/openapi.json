@@ -44,17 +44,19 @@
           "caregiverId": { "type": "string" },
           "firstName": { "type": "string" },
           "lastName": { "type": "string" },
-          "relationship": { "type": "string" }
+          "relationship": { "type": "string" },
+          "birthYear": { "type": "integer", "format": "int32" },
+          "status": { "type": "string", "enum": ["active", "inactive"] }
         }
       },
       "ProtectedMemberCreate": {
         "type": "object",
         "required": ["firstName", "lastName"],
-        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" } }
+        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" }, "birthYear": { "type": "integer" }, "status": { "type": "string", "enum": ["active","inactive"] } }
       },
       "ProtectedMemberUpdate": {
         "type": "object",
-        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" } }
+        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" }, "birthYear": { "type": "integer" }, "status": { "type": "string", "enum": ["active","inactive"] } }
       }
     }
   },

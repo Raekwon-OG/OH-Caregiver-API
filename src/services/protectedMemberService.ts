@@ -3,7 +3,10 @@ import { emitToCaregiver } from '../utils/socket';
 import { Types } from 'mongoose';
 import { logger } from '../utils/logger';
 
-export async function createMember(caregiverId: string, data: { firstName: string; lastName?: string; relationship: string }) {
+export async function createMember(
+  caregiverId: string,
+  data: { firstName: string; lastName?: string; relationship: string; birthYear?: number; status?: 'active' | 'inactive' }
+) {
   const created = await ProtectedMember.create({ ...data, caregiverId: new Types.ObjectId(caregiverId) });
   const obj = created.toObject();
   emitToCaregiver(caregiverId, 'member_added', obj);
