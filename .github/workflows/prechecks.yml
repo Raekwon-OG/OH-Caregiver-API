@@ -7,15 +7,10 @@ on:
 jobs:
   prechecks:
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:6.0
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'" --health-interval=5s --health-timeout=2s --health-retries=5
-        ports:
-          - 27017:27017
+    # Using an external managed MongoDB (Atlas) for CI: set MONGODB_URI in repository secrets
+    # as 'MONGODB_URI' (do NOT commit credentials). This avoids flaky local service network issues.
     env:
-      MONGODB_URI: mongodb://mongodb:27017/oh-caregiver
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
       PORT: 4000
 
     steps:
@@ -28,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: TypeScript typecheck
         run: npx tsc --noEmit
@@ -39,14 +34,34 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Wait for MongoDB to be reachable (driver check)
+        run: |
+          set -e
+          node scripts/wait-for-mongo.js
+
       - name: Start server (background)
         env:
           MONGODB_URI: ${{ env.MONGODB_URI }}
           PORT: ${{ env.PORT }}
           NODE_ENV: test
         run: |
-          node dist/server.js &
+          # ensure build exists (run build again to be safe) and start the server in background
+          echo "Running build before starting server"
+          npm run build
+          echo "Build finished; listing dist/"
+          ls -la dist || true
+          if [ ! -f dist/server.js ]; then
+            echo "ERROR: dist/server.js not found after build"
+            echo '--- build output (last 200 lines) ---'
+            tail -n 200 /home/runner/work/${{ github.repository }}/$(pwd)/server.log || true || true
+            exit 1
+          fi
+          # start the built server in background and capture logs
+          nohup node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
+          # give the process a moment to start and show the first few lines of logs
+          sleep 1
+          head -n 50 server.log || true
 
       - name: Wait for /health to respond
         run: |
@@ -58,7 +73,11 @@ jobs:
             echo "waiting for server... ($i)";
             sleep 1
           done
-          curl -vS http://localhost:${{ env.PORT }}/health
+          if ! curl -vS http://localhost:${{ env.PORT }}/health; then
+            echo '--- server.log (last 200 lines) ---'
+            tail -n 200 server.log || true
+            exit 1
+          fi
 
       - name: Stop server
         if: always()
