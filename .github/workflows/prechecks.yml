@@ -42,30 +42,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Wait for MongoDB to be reachable
-        # Try the service hostname first (mongodb), then fallback to localhost. This covers
-        # both GitHub Actions service setups (service-hostname reachable in container network
-        # or port-mapped to localhost on the runner).
+      - name: Wait for MongoDB to be reachable (driver check)
         run: |
           set -e
-          hosts=(mongodb 127.0.0.1)
-          ok=0
-          for host in "${hosts[@]}"; do
-            echo "Checking MongoDB at ${host}:27017"
-            for i in {1..60}; do
-              if bash -c "cat < /dev/tcp/${host}/27017" >/dev/null 2>&1; then
-                echo "MongoDB is reachable at ${host}:27017"; ok=1; break 2
-              fi
-              echo "Not reachable at ${host}:27017 (attempt $i/60), sleeping 1s..."
-              sleep 1
-            done
-          done
-          if [ $ok -ne 1 ]; then
-            echo "ERROR: MongoDB did not become reachable at any expected address"
-            echo '--- docker ps ---'
-            docker ps || true
-            exit 1
-          fi
+          node scripts/wait-for-mongo.js
 
       - name: Start server (background)
         env:
