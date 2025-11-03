@@ -1,7 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import rateLimit from 'express-rate-limit';
+import { globalLimiter } from './middleware/rateLimiters';
 import swaggerUi from 'swagger-ui-express';
 import openapiDocument from './docs/openapi.json';
 import { json } from 'body-parser';
@@ -35,12 +35,8 @@ export async function createApp() {
   app.use(cors());
   app.use(json());
 
-  app.use(
-    rateLimit({
-      windowMs: 60 * 1000,
-      max: 100,
-    })
-  );
+  // Global rate limiter
+  app.use(globalLimiter);
 
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
 

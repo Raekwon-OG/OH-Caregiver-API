@@ -94,6 +94,16 @@ RUN_REAL_SOCKET=true npm test -- tests/integration/protectedMember.realSocket.te
 
 A GitHub Actions workflow named `prechecks` runs on PRs to `main`. It performs TypeScript type-checking, ESLint linting, builds the project, and starts the built server to run a minimal /health smoke test (a MongoDB service is available to the job). The badge above links to the workflow run page.
 
+## Rate limiting
+
+The API has simple rate limiting to protect sensitive endpoints:
+
+- Global: 100 requests per minute per IP (applied to all incoming requests).
+- Login: 10 requests per 10 minutes per IP.
+- Signup: 5 requests per hour per IP.
+
+These are implemented with express-rate-limit in `src/middleware/rateLimiters.ts` and applied to the auth routes.
+
 ## Branch Protection
 
 Direct pushes to the main branch are disabled. All changes must be proposed via pull requests and must pass the prechecks workflow (.github/workflows/prechecks.yml) before they can be merged. The prechecks workflow runs TypeScript type-check, ESLint, build, and a minimal /health smoke test.
