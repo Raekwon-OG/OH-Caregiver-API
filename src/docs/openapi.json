@@ -65,7 +65,7 @@
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "type": "object" } } }
+            "content": { "application/json": { "schema": { "type": "object" }, "examples": { "default": { "value": { "status": "ok", "jwks": { "ok": true } } } } } }
           }
         }
       }
@@ -80,9 +80,9 @@
     "/api/caregivers/signup": {
       "post": {
         "summary": "Create caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverSignup" } } } },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverSignup" }, "examples": { "sample": { "value": { "email": "alice@example.com", "password": "Password1!", "name": "Alice Example" } } } } } },
         "responses": {
-          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" }, "examples": { "created": { "value": { "id": "64f0b5c2...", "name": "Alice Example", "email": "alice@example.com" } } } } } },
           "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
@@ -90,9 +90,9 @@
     "/api/caregivers/login": {
       "post": {
         "summary": "Login caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverLogin" } } } },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverLogin" }, "examples": { "sample": { "value": { "email": "alice@example.com", "password": "Password1!" } } } } } },
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } } },
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } }, "examples": { "success": { "value": { "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." } } } } } },
           "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
@@ -102,7 +102,7 @@
         "summary": "Get current caregiver",
         "security": [{ "bearerAuth": [] }],
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" }, "examples": { "me": { "value": { "id": "64f0b5c2...", "name": "Alice Example", "email": "alice@example.com" } } } } } },
           "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       }
@@ -114,15 +114,15 @@
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ProtectedMember" } } } }
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ProtectedMember" } }, "examples": { "list": { "value": [ { "id": "pm_1", "caregiverId": "64f0b5c2...", "firstName": "John", "lastName": "Doe", "relationship": "son" } ] } } } }
           }
         }
       },
       "post": {
         "summary": "Create protected member",
         "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberCreate" } } } },
-        "responses": { "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberCreate" }, "examples": { "sample": { "value": { "firstName": "John", "lastName": "Doe", "relationship": "son" } } } } } },
+        "responses": { "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" }, "examples": { "created": { "value": { "id": "pm_1", "caregiverId": "64f0b5c2...", "firstName": "John", "lastName": "Doe", "relationship": "son" } } } } } } }
       }
     },
     "/api/protected-members/{id}": {
@@ -130,316 +130,12 @@
       "get": {
         "summary": "Get a protected member",
         "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } }, "404": { "description": "Not Found" } }
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" }, "examples": { "item": { "value": { "id": "pm_1", "caregiverId": "64f0b5c2...", "firstName": "John", "lastName": "Doe", "relationship": "son" } } } } } }, "404": { "description": "Not Found" } }
       },
       "put": {
         "summary": "Update a protected member",
         "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberUpdate" } } } },
-        "responses": { "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
-      },
-      "delete": {
-        "summary": "Delete a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "204": { "description": "No Content" }, "404": { "description": "Not Found" } }
-      }
-    }
-  }
-}
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "OneHaven Caregiver API",
-    "version": "0.1.0",
-    "description": "API surface for the OneHaven Caregiver backend"
-  },
-  "servers": [{ "url": "http://localhost:4000" }],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
-    },
-    "schemas": {
-      "Error": {
-        "type": "object",
-        "properties": { "error": { "type": "object", "properties": { "message": { "type": "string" } } } }
-      },
-      "Caregiver": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "email": { "type": "string" }
-        }
-      },
-      "CaregiverSignup": {
-        "type": "object",
-        "required": ["email", "password", "name"],
-        "properties": {
-          "email": { "type": "string", "format": "email" },
-          "password": { "type": "string" },
-          "name": { "type": "string" }
-        }
-      },
-      "CaregiverLogin": {
-        "type": "object",
-        "required": ["email", "password"],
-        "properties": { "email": { "type": "string", "format": "email" }, "password": { "type": "string" } }
-      },
-      "ProtectedMember": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "caregiverId": { "type": "string" },
-          "firstName": { "type": "string" },
-          "lastName": { "type": "string" },
-          "relationship": { "type": "string" }
-        }
-      },
-      "ProtectedMemberCreate": {
-        "type": "object",
-        "required": ["firstName", "lastName"],
-        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" } }
-      },
-      "ProtectedMemberUpdate": {
-        "type": "object",
-        "properties": { "firstName": { "type": "string" }, "lastName": { "type": "string" }, "relationship": { "type": "string" } }
-      }
-    }
-  },
-  "paths": {
-    "/health": {
-      "get": {
-        "summary": "Health check",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": { "application/json": { "schema": { "type": "object" } } }
-          }
-        }
-      }
-    },
-    "/docs": {
-      "get": {
-        "summary": "Swagger UI",
-        "description": "Interactive API docs (served by swagger-ui-express)",
-        "responses": { "200": { "description": "HTML UI" } }
-      }
-    },
-    "/api/caregivers/signup": {
-      "post": {
-        "summary": "Create caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverSignup" } } } },
-        "responses": {
-          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
-          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/caregivers/login": {
-      "post": {
-        "summary": "Login caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverLogin" } } } },
-        "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } } },
-          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/caregivers/me": {
-      "get": {
-        "summary": "Get current caregiver",
-        "security": [{ "bearerAuth": [] }],
-        "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
-          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/protected-members": {
-      "get": {
-        "summary": "List protected members",
-        "security": [{ "bearerAuth": [] }],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ProtectedMember" } } } }
-          }
-        }
-      },
-      "post": {
-        "summary": "Create protected member",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberCreate" } } } },
-        "responses": { "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
-      }
-    },
-    "/api/protected-members/{id}": {
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-      "get": {
-        "summary": "Get a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } }, "404": { "description": "Not Found" } }
-      },
-      "put": {
-        "summary": "Update a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberUpdate" } } } },
-        "responses": { "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
-      },
-      "delete": {
-        "summary": "Delete a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "204": { "description": "No Content" }, "404": { "description": "Not Found" } }
-      }
-    }
-  }
-}
-{
-  "openapi": "3.0.0",
-  "info": {
-    "title": "OneHaven Caregiver API",
-    "version": "0.1.0",
-    "description": "Minimal OpenAPI spec for the OneHaven backend scaffold"
-  },
-  "servers": [{ "url": "http://localhost:4000" }],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
-    },
-    "schemas": {
-      "Error": {
-        "type": "object",
-        "properties": {
-          "error": { "type": "object", "properties": { "message": { "type": "string" } } }
-        }
-      },
-      "Caregiver": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "email": { "type": "string" }
-        }
-      },
-      "CaregiverSignup": {
-        "type": "object",
-        "required": ["email", "password", "name"],
-        "properties": {
-          "email": { "type": "string", "format": "email" },
-          "password": { "type": "string" },
-          "name": { "type": "string" }
-        }
-      },
-      "CaregiverLogin": {
-        "type": "object",
-        "required": ["email", "password"],
-        "properties": {
-          "email": { "type": "string", "format": "email" },
-          "password": { "type": "string" }
-        }
-      },
-      "ProtectedMember": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string" },
-          "caregiverId": { "type": "string" },
-          "firstName": { "type": "string" },
-          "lastName": { "type": "string" },
-          "relationship": { "type": "string" }
-        }
-      },
-      "ProtectedMemberCreate": {
-        "type": "object",
-        "required": ["firstName", "lastName"],
-        "properties": {
-          "firstName": { "type": "string" },
-          "lastName": { "type": "string" },
-          "relationship": { "type": "string" }
-        }
-      },
-      "ProtectedMemberUpdate": {
-        "type": "object",
-        "properties": {
-          "firstName": { "type": "string" },
-          "lastName": { "type": "string" },
-          "relationship": { "type": "string" }
-        }
-      }
-    }
-  },
-  "paths": {
-    "/health": {
-      "get": {
-        "summary": "Health check",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": { "application/json": { "schema": { "type": "object" } } }
-          }
-        }
-      }
-    },
-    "/docs": {
-      "get": {
-        "summary": "Swagger UI",
-        "description": "Interactive API docs (served by swagger-ui-express)",
-        "responses": { "200": { "description": "HTML UI" } }
-      }
-    },
-    "/api/caregivers/signup": {
-      "post": {
-        "summary": "Create caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverSignup" } } } },
-        "responses": {
-          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
-          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/caregivers/login": {
-      "post": {
-        "summary": "Login caregiver (dev helper)",
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CaregiverLogin" } } } },
-        "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } } },
-          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/caregivers/me": {
-      "get": {
-        "summary": "Get current caregiver",
-        "security": [{ "bearerAuth": [] }],
-        "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Caregiver" } } } },
-          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-        }
-      }
-    },
-    "/api/protected-members": {
-      "get": {
-        "summary": "List protected members",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ProtectedMember" } } } } } }
-      ,
-      "post": {
-        "summary": "Create protected member",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberCreate" } } } },
-        "responses": { "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
-      }
-    },
-    "/api/protected-members/{id}": {
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-      "get": {
-        "summary": "Get a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } }, "404": { "description": "Not Found" } }
-      },
-      "put": {
-        "summary": "Update a protected member",
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberUpdate" } } } },
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMemberUpdate" }, "examples": { "sample": { "value": { "firstName": "Johnny" } } } } } },
         "responses": { "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtectedMember" } } } } }
       },
       "delete": {
