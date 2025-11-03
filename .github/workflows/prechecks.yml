@@ -45,6 +45,17 @@ jobs:
           PORT: ${{ env.PORT }}
           NODE_ENV: test
         run: |
+          # ensure build exists (run build again to be safe) and start the server in background
+          echo "Running build before starting server"
+          npm run build
+          echo "Build finished; listing dist/"
+          ls -la dist || true
+          if [ ! -f dist/server.js ]; then
+            echo "ERROR: dist/server.js not found after build"
+            echo '--- build output (last 200 lines) ---'
+            tail -n 200 /home/runner/work/${{ github.repository }}/$(pwd)/server.log || true || true
+            exit 1
+          fi
           # start the built server in background and capture logs
           nohup node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
