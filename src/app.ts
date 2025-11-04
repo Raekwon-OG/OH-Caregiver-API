@@ -37,7 +37,39 @@ export async function createApp() {
 
   const app = express();
   app.use(helmet());
-  app.use(cors());
+
+  // Configure CORS dynamically via env vars so deployed API can accept requests
+  // from the frontend origin(s). Set CORS_ORIGIN to a comma-separated list of
+  // allowed origins (e.g. https://app.example.com,https://staging.example.com).
+  // If CORS_ALLOW_CREDENTIALS=true, the origin MUST be explicit (cannot be '*').
+  const rawOrigins = process.env.CORS_ORIGIN;
+  const allowedOrigins = rawOrigins
+    ? rawOrigins.split(',').map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const corsOptions: any = {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // browser-based requests have an origin; server-side tools (curl, server-to-server)
+      // may not include one. Allow when origin is missing.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.length === 0) {
+        // if no explicit origins configured, allow all
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
+    optionsSuccessStatus: 204,
+    credentials: (process.env.CORS_ALLOW_CREDENTIALS === 'true') || false,
+  };
+
+  // Attach CORS and preflight handling
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
+
   app.use(json());
 
   // Global rate limiter
