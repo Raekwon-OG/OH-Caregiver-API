@@ -5,7 +5,7 @@
     "version": "0.1.0",
     "description": "API surface for the OneHaven Caregiver backend"
   },
-  "servers": [{ "url": "http://localhost:4000" }],
+  "servers": [{ "url": "${SWAGGER_SERVER_URL|http://localhost:4000}", "description": "Runtime API server" }],
   "components": {
     "securitySchemes": {
       "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
