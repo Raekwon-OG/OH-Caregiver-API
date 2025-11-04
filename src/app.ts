@@ -36,6 +36,12 @@ export async function createApp() {
   }
 
   const app = express();
+  // If the app runs behind a proxy (Render, Heroku, etc.), enable trust proxy so
+  // middleware like express-rate-limit can correctly read X-Forwarded-* headers.
+  // Configure with TRUST_PROXY=true in the environment to opt in.
+  if (process.env.TRUST_PROXY === 'true') {
+    app.set('trust proxy', 1);
+  }
   app.use(helmet());
 
   // Configure CORS dynamically via env vars so deployed API can accept requests
@@ -90,6 +96,25 @@ export async function createApp() {
   });
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+  // Debug endpoint for Mongo connectivity - enabled only when MONGO_DEBUG=true
+  if (process.env.MONGO_DEBUG === 'true') {
+    try {
+      // lazy import to avoid extra deps unless needed
+      const { runMongoDiagnostics } = await import('./utils/mongoDiagnostics');
+      app.get('/debug/mongo', async (req, res) => {
+        try {
+          const uri = process.env.MONGODB_URI || '';
+          const out = await runMongoDiagnostics(uri);
+          return res.json(out);
+        } catch (err) {
+          return res.status(500).json({ error: String(err && (err as Error).stack ? (err as Error).stack : err) });
+        }
+      });
+    } catch (err) {
+      logger.warn('Failed to mount /debug/mongo', { err });
+    }
+  }
 
   app.use('/api/caregivers', caregiverRoutes);
   app.use('/api/protected-members', protectedMemberRoutes);
