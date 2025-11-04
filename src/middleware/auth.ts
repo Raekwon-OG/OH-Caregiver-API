@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
-import { verifyTokenWithJwks, checkJwksStatus } from '../utils/jwks';
+import { verifyTokenWithJwks } from '../utils/jwks';
 import * as caregiverService from '../services/caregiverService';
 
 export interface AuthRequest extends Request {
@@ -88,11 +88,21 @@ export function requireAuth(role?: string | string[]) {
       // Ensure there's a caregiver record in Mongo linked to this supabaseId
       try {
         const dbUser = await caregiverService.findOrCreateBySupabaseId(String(supabaseId), { email, name });
-        req.user = { id: supabaseId, email, role: payload.role || 'caregiver', caregiverId: dbUser._id || dbUser.id };
+        // Prefer using the DB _id (ObjectId string) as the primary `req.user.id` so
+        // downstream code that queries by caregiver ObjectId (ProtectedMember) works
+        // consistently. Keep the Supabase id as `supabaseId` on the user object.
+        const dbId = dbUser && (dbUser._id || dbUser.id) ? String(dbUser._id || dbUser.id) : undefined;
+        req.user = {
+          id: dbId || String(supabaseId),
+          supabaseId: String(supabaseId),
+          email,
+          role: payload.role || 'caregiver',
+          caregiverId: dbId,
+        };
       } catch (syncErr) {
         logger.debug('Failed to sync caregiver record', { err: syncErr });
         // continue with token-based identity but surface sync failure
-        req.user = { id: supabaseId, email, role: payload.role || 'caregiver' };
+        req.user = { id: supabaseId, supabaseId: supabaseId, email, role: payload.role || 'caregiver' };
       }
       // RBAC: allow passing a single role or an array. Also accept Supabase's 'authenticated'
       // role when the application expects 'caregiver' to be more permissive for Supabase-issued tokens.
