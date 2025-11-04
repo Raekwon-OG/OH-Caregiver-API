@@ -2,6 +2,7 @@ import dns from 'dns';
 import net from 'net';
 import tls from 'tls';
 import mongoose from 'mongoose';
+import { logger } from '../utils/logger';
 
 const { resolveSrv } = dns.promises;
 
@@ -111,10 +112,18 @@ export async function runMongoDiagnostics(uri: string) {
       const connected = await timeoutPromise(10000, new Promise((resolve, reject) => {
         conn.openUri(uri, opts).then(() => resolve({ ok: true })).catch(reject);
       }), () => {
-        try { conn.close(); } catch (e) {}
+        try {
+          conn.close();
+        } catch (e) {
+          logger.debug('conn.close failed (on timeout)', { err: String(e) });
+        }
       });
       result.mongoose = connected;
-      try { await conn.close(); } catch (e) {}
+      try {
+        await conn.close();
+      } catch (e) {
+        logger.debug('conn.close failed', { err: String(e) });
+      }
     } catch (err) {
       result.mongooseError = String(err && (err as Error).stack ? (err as Error).stack : err);
     }

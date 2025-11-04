@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
-import { verifyTokenWithJwks, checkJwksStatus } from '../utils/jwks';
+import { verifyTokenWithJwks } from '../utils/jwks';
 import * as caregiverService from '../services/caregiverService';
 
 export interface AuthRequest extends Request {
