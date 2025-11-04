@@ -11,7 +11,12 @@ import { errorHandler } from './middleware/errorHandler';
 import caregiverRoutes from './routes/caregiverRoutes';
 import protectedMemberRoutes from './routes/protectedMemberRoutes';
 
-  const swaggerDocument = openapiDocument as any;
+  // Clone and patch the OpenAPI document so Swagger UI points at the correct server
+  // Use SWAGGER_SERVER_URL or API_URL env var when provided, otherwise fall back to localhost with PORT
+  const swaggerDocument = JSON.parse(JSON.stringify(openapiDocument)) as any;
+  const envServer = process.env.SWAGGER_SERVER_URL || process.env.API_URL || `http://localhost:${process.env.PORT || 4000}`;
+  // Ensure servers array is present and points to the runtime URL
+  swaggerDocument.servers = [{ url: envServer, description: 'Runtime API server' }];
 
 export async function createApp() {
   // Initialize JWKS early to pre-warm keys for RS256 verification
